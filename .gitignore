@@ -1,5 +1,5 @@
 db.sqlite3
 geckodriver.log
-__pychace__
 __pycache__
 *.pyc
+tdd.sublime-workspace
