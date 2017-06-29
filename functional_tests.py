@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 import unittest
+import time
+from selenium.webdriver.common.keys import Keys
 
 class NewVisitorTest(unittest.TestCase):
 	def setUp(self):
@@ -17,19 +19,30 @@ class NewVisitorTest(unittest.TestCase):
 
 		# user notices the page title and header mention to-do lists
 		self.assertIn('To-Do', self.browser.title)
+		header_text=self.browser.find_elements_by_tag_name('h1').text
+		self.assertIn('To-Do', header_text)
+
+		# user is invited to enter a to-do list straight away
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		self.assertEqual(
+			inputbox.get_attribute('placeholder'),
+			'Enter a to-do item'
+		)
+
+		# user enters "Buy feathers" into a text box
+		inputbox.send_keys('Buy feathers')
+
+		# user hits enter, the page updates, and the page lists "1: Buy feathers" as an item to-do list
+		inputbox.send_keys(Keys.ENTER)
+		time.sleep(1)
+
+		table=self.browser.find_element_by_id('id_list_table')
+		rows=table.find_elements_by_tag_name('tr')
+		self.assertTrue(
+			any(row.text == '1: Buy feathers' for row in rows)
+		)
+
 		self.fail('Finish the test!')
-
-
-# Functional tests
-
-
-
-# user is invited to enter a to-do list straight away
-
-# user enters "Buy feathers" into a text box
-
-# user hits enter, the page updates, and the page lists "1: Buy feathers" as an item to-do list
-
 # there is still textbox inviting to add another item
 
 # user enters "Use feathers to make a fly"
