@@ -3,3 +3,4 @@ geckodriver.log
 __pycache__
 *.pyc
 tdd.sublime-workspace
+.DS_Store
