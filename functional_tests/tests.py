@@ -1,10 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-import unittest
+from django.test import LiveServerTestCase
 import time
 from selenium.webdriver.common.keys import Keys
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
 	def setUp(self):
 		# setting up route to firefox executable as it wasnt installed systemwide
 		self.binary = FirefoxBinary('/Users/vvperepelkin/desktop/Firefox.app/Contents/MacOS/firefox')
@@ -20,7 +20,7 @@ class NewVisitorTest(unittest.TestCase):
 
 	def test_can_start_a_list_and_retieve_it_later(self):
 		# opening homepage
-		self.browser.get('http://localhost:8000')
+		self.browser.get(self.live_server_url)
 
 		# user notices the page title and header mention to-do lists
 		self.assertIn('To-Do', self.browser.title)
@@ -65,6 +65,3 @@ class NewVisitorTest(unittest.TestCase):
 
 # User leaves the site
 		self.fail('Finish the test!')
-
-if __name__ == '__main__':
-	unittest.main(warnings='ignore')
