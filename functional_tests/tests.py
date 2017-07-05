@@ -4,6 +4,8 @@ from django.test import LiveServerTestCase
 import time
 from selenium.webdriver.common.keys import Keys
 
+MAX_WAIT = 10
+
 class NewVisitorTest(LiveServerTestCase):
 	def setUp(self):
 		# setting up route to firefox executable as it wasnt installed systemwide
@@ -13,10 +15,18 @@ class NewVisitorTest(LiveServerTestCase):
 	def tearDown(self):
 		self.browser.quit()
 
-	def check_for_row_in_list_table(self, row_text):
-		table=self.browser.find_element_by_id('id_list_table')
-		rows=table.find_elements_by_tag_name('tr')
-		self.assertIn(row_text, [row.text for row in rows])
+	def wait_for_row_in_list_table(self, row_text):
+		start_time=time.time()
+		while True:
+			try:
+				table=self.browser.find_element_by_id('id_list_table')
+				rows=table.find_elements_by_tag_name('tr')
+				self.assertIn(row_text, [row.text for row in rows])
+				return
+			except (AssertionError, WebDriverException) as e:
+				if time.time() - start_time > MAX_WAIT:
+					raise e
+				time.sleep(0.5)
 
 	def test_can_start_a_list_and_retieve_it_later(self):
 		# opening homepage
@@ -39,9 +49,7 @@ class NewVisitorTest(LiveServerTestCase):
 
 		# user hits enter, the page updates, and the page lists "1: Buy feathers" as an item to-do list
 		inputbox.send_keys(Keys.ENTER)
-		time.sleep(1)
-
-		self.check_for_row_in_list_table('1: Buy feathers')
+		self.wait_for_row_in_list_table('1: Buy feathers')
 
 # there is still textbox inviting to add another item
 # user enters "Use feathers to make a fly"
@@ -52,11 +60,10 @@ class NewVisitorTest(LiveServerTestCase):
 		)
 		inputbox.send_keys('Use feathers to make a fly')
 		inputbox.send_keys(Keys.ENTER)
-		time.sleep(1)
 # the page updates again and shows both items in a list
 
-		self.check_for_row_in_list_table('1: Buy feathers')
-		self.check_for_row_in_list_table('2: Use feathers to make a fly')
+		self.wait_for_row_in_list_table('1: Buy feathers')
+		self.wait_for_row_in_list_table('2: Use feathers to make a fly')
 
 # user sees that the site has generated a unique URL for him
 # there is explanatory text for this effect
